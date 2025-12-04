@@ -61,8 +61,8 @@ const teamRouter = require("./Route/Peoples/team");
 const user = require("./Route/Peoples/user");
 const ratingsandreviews = require("./Route/RatingReview/ratings-reviews");
 const notification = require("./Route/Notifications/notification");
-// const asin = require("./Route/asinSearch");
-// const keyword = require("./Route/keywordSearch");
+const asin = require("./Route/asinSearch");
+const keyword = require("./Route/keywordSearch");
 const inAppNoti = require("./Route/Notifications/inAppNotification");
 const freeMaterialDocRoutes = require("./Route/Content/free-material-documents");
 const freeMaterialVideoRoutes = require("./Route/Content/free-material-video");
@@ -72,8 +72,8 @@ const groupRoutes = require("./Route/Group");
 const chatRoutes = require("./Route/chat");
 const payment = require("./Route/Payment/Payment");
 const plans = require("./Route/Plan/Plan");
-// const Asin = require("./Route/Plan/asin");
-// const Keywordsarch = require("./Route/Plan/Keyword");
+const Asin = require("./Route/Plan/asin");
+const Keywordsarch = require("./Route/Plan/Keyword");
 const adminRoutes = require("./Route/admin/admin");
 const paymentkey = require("./Route/Payment/Paymentkey");
 const phonepeRoute = require("./Route/Payment/phonepeRoute");
@@ -123,7 +123,7 @@ app.use("/api", paymentone);
 app.post("/orders", async (req, res) => {
   const razorpay = new Razorpay({
     key_id: "rzp_live_gZWb9zLxROzkYB",
-    key_secret: "QqMPKEZnithH2onkIQi4U7Jh",
+  key_secret: "QqMPKEZnithH2onkIQi4U7Jh",
   });
 
   const options = {
@@ -155,8 +155,8 @@ app.get("/payment/:paymentId", async (req, res) => {
     console.log("Payment ID:", paymentId);
     console.log("User ID:", userId);
     const razorpay = new Razorpay({
-      key_id: "rzp_live_gZWb9zLxROzkYB",
-      key_secret: "QqMPKEZnithH2onkIQi4U7Jh",
+     key_id: "rzp_live_gZWb9zLxROzkYB",
+  key_secret: "QqMPKEZnithH2onkIQi4U7Jh",
     });
 
     // Fetch payment details using the Razorpay instance
