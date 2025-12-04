@@ -1,0 +1,813 @@
+// const userSchema = require("../../Model/Peoples/user");
+// const bcrypt = require("bcrypt");
+// const generateToken = require("../../Configuration/generate-jwt");
+// const {
+//   sendNotificationForRegisterUser,
+//   sendNotificationForCoursePurchasedUser,
+// } = require("../../Configuration/send-notifications");
+// // const notification = require("../../Model/Notifications/notification");
+// // const { firebase } = require("../../Firebase");
+
+// // const sendNotificationToMultipleDevices = async () => {
+// //   const data = await notification.findOne({
+// //     targetAudience: "When user signs up on app",
+// //   });
+// //   console.log("Notifications Statis:", data);
+// //   try {
+// //     console.log("yogi adad");
+// //     await firebase.messaging().send({
+// //       token:
+// //         "emBZN2uuSman_QKZC_eI5D:APA91bHtNfDR6WVPcyk0--yrGQwmsuC34t1tHJP5Ibtdxo9yw-dw7CL_ZDVf7S74yGFdm3-DC_e8IhJzezD0ulzOZ_634MyEEgXkZXNlnJFtzBl4v1l07MRSjxM4wE680M2RTetYmbAx",
+// //       notification: {
+// //         title: data.notificationTitle,
+// //         body: data.notificationDescription,
+// //       },
+// //       data: {
+// //         navigationId: "login",
+// //         chatId: "12345",
+// //       },
+// //     });
+// //     console.log(`Notification sent successfully to vendor with FCM token: $}`);
+// //   } catch (error) {
+// //     console.error(
+// //       `Error sending notification to vendor with FCM token :`,
+// //       error
+// //     );
+// //   }
+// // };
+// // --------------------------------------------------------------------------------------------------------
+// // const jwtUtils = require("../../Configuration/jwtUtils");
+
+// // this below one for verifying  the token and checking if it is expired or not.
+// // const token = '...'; // Your JWT token
+
+// // Verify the token
+// // jwtUtils.verifyToken(token)
+// //     .then(decoded => {
+// //         console.log('Decoded token:', decoded);
+// //     })
+// //     .catch(err => {
+// //         console.error('JWT verification failed:', err);
+// //     });
+
+// // // Decode the token
+// // const decodedToken = jwtUtils.decodeToken(token);
+// // console.log('Decoded token:', decodedToken);
+// // ----------------------------------------------------------------------------------------------------------
+
+// class User {
+//   async createUser(req, res) {
+//     try {
+//       const {
+//         name,
+//         phoneNumber,
+//         email,
+//         password,
+//         // gender,
+//         // password,
+//         // dateOfBirth,
+//         fcmToken,
+//         firebaseUserId,
+//       } = req.body;
+//       // let file = req.file.filename;
+
+//       const userExists = await userSchema.findOne({ email });
+//       if (userExists) {
+//         return res.status(400).json({ error: "User already exists" });
+//       }
+
+//       // const salt = await bcrypt.genSalt(10);
+//       // const hashedPassword = await bcrypt.hash(password, salt);
+
+//       const user = await userSchema.create({
+//         name,
+//         phoneNumber,
+//         email,
+//         password,
+//         // gender,
+//         // password: hashedPassword,
+//         // dateOfBirth,
+//         // profilePicture: file,
+//         fcmToken,
+//         firebaseUserId,
+//       });
+//       await sendNotificationForCoursePurchasedUser(fcmToken);
+//       // await sendNotificationForRegisterUser(fcmToken);
+//       res.status(200).json({
+//         status: true,
+//         message: "User created successfully!",
+//         data: user,
+//       });
+//     } catch (error) {
+//       console.log("error", error);
+//       return res.status(500).json({ error });
+//     }
+//   }
+
+//   // async userLogin(req, res) {
+//   //   const { email, password } = req.body;
+//   //   try {
+//   //     const user = await userSchema.findOne({ email });
+//   //     if (!user) {
+//   //       return res.status(400).json({ error: "Invalid email or password" });
+//   //     }
+//   //     const isPasswordValid = bcrypt.compare(password, user.password);
+//   //     if (!isPasswordValid) {
+//   //       return res.status(400).json({ error: "Invalid email or password" });
+//   //     }
+//   //     const token = generateToken(user._id);
+
+//   //     // =====================token verification=============================
+//   //     const verifyToken = token;
+//   //     // Verify the token
+//   //     jwtUtils
+//   //       .verifyToken(verifyToken)
+//   //       .then((decoded) => {
+//   //         console.log("Decoded token:", decoded);
+//   //       })
+//   //       .catch((err) => {
+//   //         console.error("JWT verification failed:", err);
+//   //       });
+
+//   //     // Decode the token
+//   //     const decodedToken = jwtUtils.decodeToken(verifyToken);
+//   //     console.log("Decoded token:", decodedToken);
+//   //     //==============verification completing here==========================
+
+//   //     // Return JWT token
+//   //     res.status(200).json({ token });
+//   //   } catch (error) {
+//   //     console.error("Error logging in:", error);
+//   //     res.status(500).json({ error: "Internal Server Error" });
+//   //   }
+//   // }
+
+//   async userLogin(req, res) {
+//     const { email, password } = req.body;
+//     try {
+//       // Check if email and password are provided
+//       if (!email || !password) {
+//         return res
+//           .status(400)
+//           .json({ error: "Email and password are required" });
+//       }
+
+//       const user = await userSchema.findOne({ email });
+//       if (!user) {
+//         return res.status(400).json({ error: "Invalid Email Address" });
+//       }
+
+//       const isPasswordValid = await bcrypt.compare(password, user.password);
+//       if (!isPasswordValid) {
+//         return res.status(400).json({ error: "Invalid password" });
+//       }
+//       // Generate token
+//       const token = generateToken(user._id);
+//       // Return JWT token
+//       res.status(200).json({
+//         message: "Login Success",
+//         user: user,
+//         // token,
+//         // userName: user.name,
+//         // _id: user._id,
+//         userStatus: "Online",
+//       });
+//     } catch (error) {
+//       console.error("Error logging in:", error);
+//       res.status(500).json({ error: "Internal Server Error" });
+//     }
+//   }
+
+//   async getParticularUser(req, res) {
+//     try {
+//       const user = await userSchema.findOne({ _id: req.params.id });
+//       if (user) {
+//         return res.status(200).json({
+//           status: true,
+//           data: user,
+//         });
+//       }
+//     } catch (error) {
+//       return res.status(500).json({
+//         status: false,
+//         message: "Internal Server Error",
+//         error,
+//       });
+//     }
+//   }
+
+//   async getAllUer(req, res) {
+//     try {
+//       const allUser = (await userSchema.find()).reverse(true);
+//       if (allUser.length > 0) {
+//         return res.status(200).json({
+//           status: true,
+//           data: allUser,
+//         });
+//       }
+//     } catch (error) {
+//       return res.status(500).json({
+//         status: false,
+//         message: "Internal Server Error",
+//         error,
+//       });
+//     }
+//   }
+
+//   async updateUser(req, res) {
+//     try {
+//       const userId = req.params.id;
+//       const { name, phoneNumber, email, gender, password } = req.body;
+//       let user = await userSchema.findOne({ _id: userId });
+//       if (!user) {
+//         return res.status(404).json({
+//           status: 404,
+//           error: "Id not found",
+//         });
+//       }
+//       await userSchema.findOneAndUpdate(
+//         { _id: userId },
+//         {
+//           name,
+//           phoneNumber,
+//           email,
+//           gender,
+//           password,
+//           // dateOfBirth,
+//         },
+//         {
+//           new: true,
+//         }
+//       );
+//       console.log("User", User);
+//       res.status(200).json({
+//         status: true,
+//         success: "Updated",
+//         data: User,
+//       });
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   }
+
+//   async deleteUser(req, res) {
+//     try {
+//       const _id = req.params.id;
+//       const user = await userSchema.findByIdAndDelete(_id);
+//       if (!user) {
+//         return res
+//           .status(404)
+//           .json({ status: false, message: "user not found" });
+//       }
+//       return res
+//         .status(200)
+//         .send({ status: true, success: "user deleted successfully" });
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   }
+
+//   async purchaseCourse(req, res) {
+//     try {
+//       const findUser = await userSchema.findOne({ _id: req.params.id });
+
+//       if (!findUser) return res.status(404).json({ error: "User not found" });
+
+//       const { courseDetails } = req.body;
+
+//       // Update the courseDetails array of the found coupon
+//       findUser.courseDetails = courseDetails;
+//       await sendNotificationForCoursePurchasedUser();
+//       // Save the updated coupon
+//       await findUser.save();
+
+//       res.status(200).json({
+//         status: true,
+//         success: "Course Purchased",
+//         data: findUser, // Return the updated coupon
+//       });
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   }
+
+//   async continueWatching(req, res) {
+//     try {
+//       const userId = req.params.id;
+//       const { videoDetails } = req.body;
+
+//       const findUser = await userSchema.findOne({ _id: userId });
+
+//       if (!findUser) {
+//         return res.status(404).json({ error: "No such record found" });
+//       }
+
+//       // Check if videoDetails is an array before attempting to iterate over it
+//       if (!Array.isArray(videoDetails)) {
+//         return res.status(400).json({ error: "Invalid videoDetails format" });
+//       }
+
+//       videoDetails.forEach((newEntry) => {
+//         const videoId = newEntry.videoId;
+//         const watchDuration = newEntry.watchDuration;
+//         const videoName = newEntry.videoName;
+//         const videoLink = newEntry.videoLink;
+//         const totalDuration = newEntry.totalDuration;
+
+//         const existingIndex = findUser.videoDetails.findIndex(
+//           (item) => item.videoId === videoId
+//         );
+
+//         if (existingIndex === -1) {
+//           findUser.videoDetails.push({
+//             videoId,
+//             watchDuration,
+//             videoName,
+//             videoLink,
+//             totalDuration,
+//           });
+//         } else {
+//           findUser.videoDetails[existingIndex].watchDuration = watchDuration;
+//         }
+//       });
+
+//       const updatedUser = await userSchema.findOneAndUpdate(
+//         { _id: userId },
+//         { $set: { videoDetails: findUser.videoDetails } },
+//         { new: true }
+//       );
+
+//       return res.status(200).json({
+//         message: "Updated successfully",
+//         data: updatedUser,
+//       });
+//     } catch (error) {
+//       console.error(error);
+//       return res.status(500).json({ error: "Unable to update the user" });
+//     }
+//   }
+
+//   // async startConversations(req, res) {
+//   //   try {
+//   //     const findUser = await userSchema.findOne({ _id: req.params.id });
+//   //     if (!findUser) {
+//   //       return res.status(401).json({ error: "user not found" });
+//   //     }
+//   //     const { chat } = req.body;
+//   //     const newConversation = {
+//   //       chat,
+//   //       timestamp: new Date(),
+//   //     };
+
+//   //     findUser.conversationList.push(newConversation);
+
+//   //     await findUser.save();
+//   //     res.status(200).json({
+//   //       status: true,
+//   //       success: "Message sent",
+//   //       data: findUser.conversationList,
+//   //     });
+//   //   } catch (error) {
+//   //     res.status(500).json({ error: error.message });
+//   //   }
+//   // }
+
+//   constructor() {
+//     this.sendMessageSocket = this.sendMessageSocket.bind(this);
+//     this.sendMessageHttp = this.sendMessageHttp.bind(this);
+//   }
+
+//   async sendMessageSocket(data) {
+//     const { userId, chat, receiverId } = data;
+//     const newMessage = {
+//       senderId: userId,
+//       chat,
+//       timestamp: new Date(),
+//     };
+
+//     const user = await userSchema.findOne({ _id: userId });
+//     const receiver = await userSchema.findById(receiverId);
+
+//     if (!user || !receiver) {
+//       throw new Error("User not found");
+//     }
+
+//     user.conversationList.push(newMessage);
+//     await user.save();
+
+//     receiver.conversationList.push(newMessage);
+//     await receiver.save();
+
+//     return newMessage;
+//   }
+
+//   async sendMessageHttp(req, res) {
+//     try {
+//       const newMessage = await this.sendMessageSocket(req.body);
+//       res.status(200).json(newMessage);
+//     } catch (error) {
+//       res.status(500).json({ error: error.message });
+//     }
+//   }
+// }
+
+// const userController = new User();
+// module.exports = userController;
+
+const user = require("../../Model/Peoples/user");
+const userSchema = require("../../Model/Peoples/user");
+const bcrypt = require("bcryptjs");
+
+const generateToken = require("../../Configuration/generate-jwt");
+const {
+  sendNotificationForRegisterUser,
+  sendNotificationForCoursePurchasedUser,
+} = require("../../Configuration/send-notifications");
+
+class User {
+      async register(req, res) {
+    const { firstname, lastname, email, name, password, phoneNumber } =
+      req.body;
+    try {
+      const existingUser = await user.findOne({ email });
+      const existingNumber = await user.findOne({ phoneNumber });
+      if (existingUser)
+        return res.status(400).json({ error: "Email already Exits" });
+      if (existingNumber)
+        return res.status(400).json({ error: "Phone Number already Exits" });
+
+      // const fullname = firstname + " " + lastname;
+      const defaultFirstname = name;
+      const defaultLastname = "";
+
+      // Check if firstname or lastname is undefined
+      const fullname =
+        (firstname === undefined ? defaultFirstname : firstname) +
+        " " +
+        (lastname === undefined ? defaultLastname : lastname);
+      const newuser = new user({
+        email,
+        password,
+        name: fullname,
+        phoneNumber,
+      });
+      const token = await newuser.generateAuthToken();
+      await newuser.save();
+      res.json({ message: "success", token: token });
+    } catch (error) {
+      console.log("Error in register " + error);
+      res.status(500).send(error);
+    }
+  }
+
+
+  async login(req, res) {
+    const { email, password } = req.body;
+  
+
+  try {
+      const valid = await user.findOne({ email });
+      if (!valid) res.status(200).json({ message: "User dont exist" });
+      const validPassword = await bcrypt.compare(password, valid.password);
+      if (!validPassword) {
+        res.status(200).json({ message: "Invalid Credentials" });
+      } else {
+        const token = await valid.generateAuthToken();
+        await valid.save();
+        res.cookie("userToken", token, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
+        });
+        res.status(200).json({ token: token, status: 200, user: valid });
+      }
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
+  }
+
+  async validUser(req, res) {
+    try {
+      const validuser = await user
+        .findOne({ _id: req.rootUserId })
+        .select("-password");
+      if (!validuser) res.json({ message: "user is not valid" });
+      res.status(201).json({
+        user: validuser,
+        token: req.token,
+      });
+    } catch (error) {
+      res.status(500).json({ error: error });
+      console.log(error);
+    }
+  }
+
+  async logout(req, res) {
+    req.rootUser.tokens = req.rootUser.tokens.filter(
+      (e) => e.token != req.token
+    );
+  }
+  async searchUsers(req, res) {
+    // const { search } = req.query;
+    const search = req.query.search
+      ? {
+          $or: [
+            { name: { $regex: req.query.search, $options: "i" } },
+            { email: { $regex: req.query.search, $options: "i" } },
+          ],
+        }
+      : {};
+
+    const users = await user
+      .find(search)
+      .find({ _id: { $ne: req.rootUserId } });
+    res.status(200).send(users);
+  }
+  async getUserById(req, res) {
+    const { id } = req.params;
+    try {
+      const selectedUser = await user.findOne({ _id: id }).select("-password");
+      res.status(200).json(selectedUser);
+    } catch (error) {
+      res.status(500).json({ error: error });
+    }
+  }
+  async getAllUser(req, res) {
+    try {
+      // Fetch all users from the database
+      const allUsers = await user.find({});
+
+      // Respond with the list of all users
+      res.status(200).json({ allUsers });
+    } catch (error) {
+      // Log the error for debugging
+      console.error("Error fetching all users:", error);
+
+      // Respond with an error status and message
+      res.status(500).json({ error: "Server error. Please try again later." });
+    }
+  }
+  async updateInfo(req, res) {
+    const { id } = req.params;
+    const { bio, name } = req.body;
+    const updatedUser = await user.findByIdAndUpdate(id, { name, bio });
+    return updatedUser;
+  }
+
+  ///kirthi code
+
+  async createUser(req, res) {
+    try {
+      const {
+        name,
+        phoneNumber,
+        email,
+        password,
+        // gender,
+        // password,
+        // dateOfBirth,
+        fcmToken,
+        firebaseUserId,
+      } = req.body;
+      // let file = req.file.filename;
+
+      const userExists = await userSchema.findOne({ email });
+      if (userExists) {
+        return res.status(400).json({ error: "User already exists" });
+      }
+
+      // const salt = await bcrypt.genSalt(10);
+      // const hashedPassword = await bcrypt.hash(password, salt);
+
+      const user = await userSchema.create({
+        name,
+        phoneNumber,
+        email,
+        password,
+        // gender,
+        // password: hashedPassword,
+        // dateOfBirth,
+        // profilePicture: file,
+        fcmToken,
+        firebaseUserId,
+      });
+      await sendNotificationForCoursePurchasedUser(fcmToken);
+      // await sendNotificationForRegisterUser(fcmToken);
+      res.status(200).json({
+        status: true,
+        message: "User created successfully!",
+        data: user,
+      });
+    } catch (error) {
+      console.log("error", error);
+      return res.status(500).json({ error });
+    }
+  }
+
+  async userLogin(req, res) {
+    const { email, password } = req.body;
+    try {
+      // Check if email and password are provided
+      if (!email || !password) {
+        return res
+          .status(400)
+          .json({ error: "Email and password are required" });
+      }
+
+      const user = await userSchema.findOne({ email });
+      if (!user) {
+        return res.status(400).json({ error: "Invalid Email Address" });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(400).json({ error: "Invalid password" });
+      }
+      // Generate token
+      const token = generateToken(user._id);
+      // Return JWT token
+      res.status(200).json({
+        message: "Login Success",
+        user: user,
+        // token,
+        // userName: user.name,
+        // _id: user._id,
+        userStatus: "Online",
+      });
+    } catch (error) {
+      console.error("Error logging in:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  }
+
+  async getParticularUser(req, res) {
+    try {
+      const user = await userSchema.findOne({ _id: req.params.id });
+      if (user) {
+        return res.status(200).json({
+          status: true,
+          data: user,
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        status: false,
+        message: "Internal Server Error",
+        error,
+      });
+    }
+  }
+
+  async getAllUer(req, res) {
+    try {
+      const allUser = (await userSchema.find()).reverse(true);
+      if (allUser.length > 0) {
+        return res.status(200).json({
+          status: true,
+          data: allUser,
+        });
+      }
+    } catch (error) {
+      return res.status(500).json({
+        status: false,
+        message: "Internal Server Error",
+        error,
+      });
+    }
+  }
+
+  async updateUser(req, res) {
+    try {
+      const userId = req.params.id;
+      const { name, phoneNumber, email, gender, password } = req.body;
+      let user = await userSchema.findOne({ _id: userId });
+      if (!user) {
+        return res.status(404).json({
+          status: 404,
+          error: "Id not found",
+        });
+      }
+      await userSchema.findOneAndUpdate(
+        { _id: userId },
+        {
+          name,
+          phoneNumber,
+          email,
+          gender,
+          password,
+          // dateOfBirth,
+        },
+        {
+          new: true,
+        }
+      );
+      console.log("User", User);
+      res.status(200).json({
+        status: true,
+        success: "Updated",
+        data: User,
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async deleteUser(req, res) {
+    try {
+      const _id = req.params.id;
+      const user = await userSchema.findByIdAndDelete(_id);
+      if (!user) {
+        return res
+          .status(404)
+          .json({ status: false, message: "user not found" });
+      }
+      return res
+        .status(200)
+        .send({ status: true, success: "user deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async purchaseCourse(req, res) {
+    try {
+      const findUser = await userSchema.findOne({ _id: req.params.id });
+
+      if (!findUser) return res.status(404).json({ error: "User not found" });
+
+      const { courseDetails } = req.body;
+
+      // Update the courseDetails array of the found coupon
+      findUser.courseDetails = courseDetails;
+      await sendNotificationForCoursePurchasedUser();
+      // Save the updated coupon
+      await findUser.save();
+
+      res.status(200).json({
+        status: true,
+        success: "Course Purchased",
+        data: findUser, // Return the updated coupon
+      });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async continueWatching(req, res) {
+    try {
+      const userId = req.params.id;
+      const { videoDetails } = req.body;
+
+      const findUser = await userSchema.findOne({ _id: userId });
+
+      if (!findUser) {
+        return res.status(404).json({ error: "No such record found" });
+      }
+
+      // Check if videoDetails is an array before attempting to iterate over it
+      if (!Array.isArray(videoDetails)) {
+        return res.status(400).json({ error: "Invalid videoDetails format" });
+      }
+
+      videoDetails.forEach((newEntry) => {
+        const videoId = newEntry.videoId;
+        const watchDuration = newEntry.watchDuration;
+        const videoName = newEntry.videoName;
+        const videoLink = newEntry.videoLink;
+        const totalDuration = newEntry.totalDuration;
+
+        const existingIndex = findUser.videoDetails.findIndex(
+          (item) => item.videoId === videoId
+        );
+
+        if (existingIndex === -1) {
+          findUser.videoDetails.push({
+            videoId,
+            watchDuration,
+            videoName,
+            videoLink,
+            totalDuration,
+          });
+        } else {
+          findUser.videoDetails[existingIndex].watchDuration = watchDuration;
+        }
+      });
+
+      const updatedUser = await userSchema.findOneAndUpdate(
+        { _id: userId },
+        { $set: { videoDetails: findUser.videoDetails } },
+        { new: true }
+      );
+
+      return res.status(200).json({
+        message: "Updated successfully",
+        data: updatedUser,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: "Unable to update the user" });
+    }
+  }
+}
+
+const userController = new User();
+module.exports = userController;
